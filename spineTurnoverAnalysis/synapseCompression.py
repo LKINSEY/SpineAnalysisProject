@@ -116,14 +116,14 @@ def create_img_features(tiffMov):
     stdPix = np.nanstd(tiffMov, axis=1)
     stdPix = np.reshape(stdPix, (len(stdPix),1))
     regularizedMov = (tiffMov - avgPix) / stdPix
-    feature1 = (np.nanmax(tiffMov, axis=1)) ##edited, taking the max makes more sense, if the sensor has really good snr
+    feature1 = (np.nanmax(tiffMov, axis=1))
     feature1 = np.reshape(feature1, (len(feature1),1))
 
-    #what matters most is this feature right here... #modifying again to make it skew instead of var
-    feature2 =(np.nanmean(tiffMov, axis=1)) ##### changed changed again by log transforming because numbers so big np.sum bugs out
+    
+    feature2 =(np.nanmean(tiffMov, axis=1)) 
     feature2 = np.reshape(feature2, (len(feature2),1))
 
-    #unless we add more features?? (but then we won't be able to plot it on a 2d scatter..)
+    #unless we add more features??
     feature3 = np.log(np.nanvar(regularizedMov, axis=1))
     feature3 = np.reshape(feature3, (len(feature3),1))
 
@@ -132,16 +132,13 @@ def create_img_features(tiffMov):
 
     print('Feature 1 shape: ', feature1.shape)
     print('Feature 2 shape: ', feature2.shape)
-    print('We have so many features now....')
+
     return np.concatenate((feature1, feature2, feature3, feature4), axis=1)
 
 Xdata = create_img_features(reshapedStack).T
-#we just want to visualize clusters, ideally background, stucture, and synapse pixels
-#note that we can kind of see motion effects when we imshow(reshapedStack) -- maybe just throw away these bullshit frames?
-#we can do that later, do it by making a distribution of the location of the "not non pixels" in each col, then if the avg of that dist is beyond 1 sigma throw that shit away
 print('Feature Array Shape is: \n', Xdata.shape)
 
-K = 4#seems like some points on dendrite are actually showing up as cluster 1.... wonder why... cluster 1 is background, cluster 2 is noise, cluster 3 is structural, can we make cluster 4 synapses?
+K = 4
 max_iters = 20
 #Running our k means alg on Xdata
 initial_centroids = kmeans_init_centroids(Xdata.T, K)
